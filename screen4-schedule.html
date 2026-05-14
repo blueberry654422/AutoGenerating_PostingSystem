@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaptionAI — Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7f77dd; --purple-light: #eeedfe; --purple-mid: #afa9ec; --purple-dark: #3c3489;
+    --bg: #f8f7fc; --surface: #ffffff; --border: #e4e2f0;
+    --text: #1a1828; --text-2: #6b6880; --text-3: #a09db8;
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --amber-bg: #faeeda; --amber-text: #854f0b;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav { background: #0e0c1a; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #fff; text-decoration: none; }
+  .logo-icon { width: 28px; height: 28px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo span { color: var(--purple-mid); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #888; }
+  .nav-link.active { color: #fff; background: rgba(127,119,221,0.2); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2f2d70; color: var(--purple-mid); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+
+  .stepper-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .stepper { display: flex; align-items: center; max-width: 780px; margin: 0 auto; padding: 14px 0; gap: 0; overflow-x: auto; }
+  .step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); color: var(--text-3); background: var(--bg); }
+  .step-name { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .step.active .step-num { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .step.active .step-name { color: var(--text); font-weight: 500; }
+  .step.done .step-num { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); font-size: 13px; }
+  .step.done .step-name { color: var(--text-2); }
+  .step-line { flex: 1; min-width: 20px; height: 1px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--green-border); }
+
+  main { flex: 1; padding: 40px 32px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 580px; }
+  .page-heading { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text-2); margin-bottom: 28px; }
+
+  /* MODE TABS */
+  .mode-tabs { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
+  .mode-tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; cursor: pointer; color: var(--text-2); border-radius: 0; transition: all 0.15s; }
+  .mode-tab.active { background: var(--purple); color: #fff; font-weight: 500; }
+  .mode-tab:hover:not(.active) { background: var(--purple-light); color: var(--purple); }
+
+  /* PANEL */
+  .mode-panel { display: none; }
+  .mode-panel.visible { display: block; }
+
+  /* NOW PANEL */
+  .platform-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; }
+  .platform-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .platform-row:last-child { border-bottom: none; }
+  .prow-left { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+  .prow-icon { font-size: 20px; }
+  .prow-name { font-weight: 500; }
+  .prow-sub { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+  .status-pill { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; }
+  .pill-ready { background: var(--green-bg); color: var(--green-text); }
+  .pill-warn { background: var(--amber-bg); color: var(--amber-text); }
+
+  .info-box { border-radius: var(--radius-sm); padding: 12px 14px; display: flex; gap: 10px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
+  .info-box.purple { background: var(--purple-light); border: 1px solid var(--purple-mid); color: var(--purple-dark); }
+  .info-box.amber { background: var(--amber-bg); border: 1px solid #fac775; color: var(--amber-text); }
+
+  /* SCHEDULE PANEL */
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; display: block; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-input { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; color: var(--text); background: var(--surface); font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .field-input:focus { border-color: var(--purple); }
+
+  /* BEST TIME PANEL */
+  .best-time-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; }
+  .bt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .bt-platform { font-size: 14px; font-weight: 500; }
+  .bt-selected { font-size: 12px; color: var(--purple); font-weight: 500; }
+  .time-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .time-opt { border: 1.5px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .time-opt:hover { border-color: var(--purple-mid); background: var(--purple-light); }
+  .time-opt.picked { border-color: var(--purple); background: var(--purple-light); }
+  .time-val { font-size: 14px; font-weight: 500; color: var(--text); }
+  .time-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .time-score { font-size: 10px; color: var(--green-text); background: var(--green-bg); padding: 2px 6px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+
+  /* SUMMARY */
+  .post-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; }
+  .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .sum-row:last-child { border-bottom: none; }
+  .sum-key { color: var(--text-2); }
+  .sum-val { color: var(--text); font-weight: 500; }
+
+  .actions { display: flex; justify-content: space-between; margin-top: 8px; }
+  .btn-ghost { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .btn-primary { background: #534ab7; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .btn-primary:hover { background: #3c3489; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#"><div class="logo-icon">⚡</div>Caption<span>AI</span></a>
+  <div class="nav-links">
+    <div class="nav-link active">Create</div>
+    <div class="nav-link">History</div>
+    <div class="nav-link">Analytics</div>
+    <div class="nav-link">Settings</div>
+  </div>
+  <div class="avatar">JL</div>
+</nav>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Upload</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Generate</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Review</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Platform</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">5</div><div class="step-name">Schedule</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">6</div><div class="step-name">Done</div></div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="page-heading">When should we post?</div>
+    <div class="page-sub">Post immediately, pick a date & time, or let AI choose the best time for maximum reach.</div>
+
+    <div class="mode-tabs">
+      <div class="mode-tab active" onclick="switchMode('now', this)">⚡ Post now</div>
+      <div class="mode-tab" onclick="switchMode('schedule', this)">📅 Schedule</div>
+      <div class="mode-tab" onclick="switchMode('best', this)">✨ Best time (AI)</div>
+    </div>
+
+    <!-- POST NOW -->
+    <div class="mode-panel visible" id="panel-now">
+      <div class="platform-list">
+        <div class="platform-row">
+          <div class="prow-left">
+            <div class="prow-icon">📕</div>
+            <div>
+              <div class="prow-name">Xiaohongshu</div>
+              <div class="prow-sub">Caption + 5 hashtags ready</div>
+            </div>
+          </div>
+          <div class="status-pill pill-warn">Needs confirm</div>
+        </div>
+        <div class="platform-row">
+          <div class="prow-left">
+            <div class="prow-icon">📸</div>
+            <div>
+              <div class="prow-name">Instagram</div>
+              <div class="prow-sub">Caption + 5 hashtags ready</div>
+            </div>
+          </div>
+          <div class="status-pill pill-ready">Auto-post</div>
+        </div>
+      </div>
+      <div class="info-box amber">
+        <span>⚠️</span>
+        <div>XHS requires you to open the app and tap Confirm after we submit. We'll send a notification.</div>
+      </div>
+      <div class="info-box purple">
+        <span>💡</span>
+        <div>Current time is 8:42 AM — not the peak window for your audience. Consider scheduling for 12:00 PM or 7:00 PM for better reach.</div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="mode-panel" id="panel-schedule">
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Date</label>
+          <input class="field-input" type="date" value="2026-05-14">
+        </div>
+        <div class="field">
+          <label class="field-label">Time</label>
+          <input class="field-input" type="time" value="12:00">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Timezone</label>
+        <input class="field-input" value="Asia/Kuala_Lumpur (GMT+8)">
+      </div>
+      <div class="platform-list">
+        <div class="platform-row">
+          <div class="prow-left"><div class="prow-icon">📕</div><div><div class="prow-name">XHS</div><div class="prow-sub">Scheduled: 14 May · 12:00 PM</div></div></div>
+          <div class="status-pill pill-warn">Needs confirm</div>
+        </div>
+        <div class="platform-row">
+          <div class="prow-left"><div class="prow-icon">📸</div><div><div class="prow-name">Instagram</div><div class="prow-sub">Scheduled: 14 May · 12:00 PM</div></div></div>
+          <div class="status-pill pill-ready">Auto-post</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEST TIME -->
+    <div class="mode-panel" id="panel-best">
+      <div class="info-box purple" style="margin-bottom:16px">
+        <span>🧠</span>
+        <div>Based on your audience's past engagement, here are the top posting windows for each platform.</div>
+      </div>
+      <div class="best-time-card">
+        <div class="bt-header">
+          <div class="bt-platform">📕 Xiaohongshu</div>
+          <div class="bt-selected" id="xhsPicked">12:00 PM selected</div>
+        </div>
+        <div class="time-options">
+          <div class="time-opt picked" onclick="pickTime(this,'xhsPicked','12:00 PM')"><div class="time-val">12:00 PM</div><div class="time-label">Lunch</div><div class="time-score">★ Best</div></div>
+          <div class="time-opt" onclick="pickTime(this,'xhsPicked','7:30 PM')"><div class="time-val">7:30 PM</div><div class="time-label">Evening</div><div class="time-score">★ Good</div></div>
+          <div class="time-opt" onclick="pickTime(this,'xhsPicked','9:00 AM')"><div class="time-val">9:00 AM</div><div class="time-label">Morning</div></div>
+        </div>
+      </div>
+      <div class="best-time-card">
+        <div class="bt-header">
+          <div class="bt-platform">📸 Instagram</div>
+          <div class="bt-selected" id="igPicked">7:00 PM selected</div>
+        </div>
+        <div class="time-options">
+          <div class="time-opt" onclick="pickTime(this,'igPicked','12:00 PM')"><div class="time-val">12:00 PM</div><div class="time-label">Lunch</div><div class="time-score">★ Good</div></div>
+          <div class="time-opt picked" onclick="pickTime(this,'igPicked','7:00 PM')"><div class="time-val">7:00 PM</div><div class="time-label">Evening</div><div class="time-score">★ Best</div></div>
+          <div class="time-opt" onclick="pickTime(this,'igPicked','8:30 AM')"><div class="time-val">8:30 AM</div><div class="time-label">Morning</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="post-summary" style="margin-top:20px">
+      <div class="sum-row"><div class="sum-key">Caption selected</div><div class="sum-val">Caption A</div></div>
+      <div class="sum-row"><div class="sum-key">Platforms</div><div class="sum-val">Xiaohongshu, Instagram</div></div>
+      <div class="sum-row"><div class="sum-key">Post mode</div><div class="sum-val" id="modeLabel">Post now</div></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost" onclick="window.location.href='screen3-review.html'">← Back</button>
+      <button class="btn-primary" onclick="window.location.href='screen5-done.html'">
+        ✅ Confirm & post
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  function switchMode(mode, tab) {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('visible'));
+    document.getElementById('panel-' + mode).classList.add('visible');
+    const labels = { now: 'Post now', schedule: 'Scheduled', best: 'AI best time' };
+    document.getElementById('modeLabel').textContent = labels[mode];
+  }
+  function pickTime(opt, labelId, time) {
+    opt.closest('.time-options').querySelectorAll('.time-opt').forEach(o => o.classList.remove('picked'));
+    opt.classList.add('picked');
+    document.getElementById(labelId).textContent = time + ' selected';
+  }
+</script>
+</body>
+</html>

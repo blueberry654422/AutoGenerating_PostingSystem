@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaptionAI — Generate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7f77dd;
+    --purple-light: #eeedfe;
+    --purple-mid: #afa9ec;
+    --purple-dark: #3c3489;
+    --bg: #f8f7fc;
+    --surface: #ffffff;
+    --border: #e4e2f0;
+    --text: #1a1828;
+    --text-2: #6b6880;
+    --text-3: #a09db8;
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav { background: #0e0c1a; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #fff; text-decoration: none; }
+  .logo-icon { width: 28px; height: 28px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo span { color: var(--purple-mid); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #888; cursor: pointer; }
+  .nav-link.active { color: #fff; background: rgba(127,119,221,0.2); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2f2d70; color: var(--purple-mid); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+
+  .stepper-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .stepper { display: flex; align-items: center; max-width: 780px; margin: 0 auto; padding: 14px 0; gap: 0; overflow-x: auto; }
+  .step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); color: var(--text-3); background: var(--bg); }
+  .step-name { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .step.active .step-num { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .step.active .step-name { color: var(--text); font-weight: 500; }
+  .step.done .step-num { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); font-size: 13px; }
+  .step.done .step-name { color: var(--text-2); }
+  .step-line { flex: 1; min-width: 20px; height: 1px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--green-border); }
+
+  main { flex: 1; padding: 40px 32px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 620px; }
+  .page-heading { font-size: 22px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text-2); margin-bottom: 24px; }
+
+  /* SOURCE ROW */
+  .source-row {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 24px;
+  }
+  .source-thumb {
+    width: 60px; height: 60px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--purple-mid) 0%, var(--purple) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .source-info { flex: 1; }
+  .source-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .source-meta { font-size: 12px; color: var(--text-2); margin-top: 3px; }
+  .source-change { font-size: 12px; color: var(--purple); cursor: pointer; }
+
+  /* AI LOADER */
+  .ai-loader {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: var(--purple-light); border: 1px solid var(--purple-mid);
+    border-radius: var(--radius-sm); margin-bottom: 20px;
+    font-size: 13px; color: var(--purple-dark);
+  }
+  .dots { display: flex; gap: 4px; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--purple);
+    animation: bop 1.2s infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bop { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+  /* CAPTION CARD */
+  .caption-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+    margin-bottom: 14px;
+    animation: slideUp 0.3s ease both;
+  }
+  .caption-card.selected { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(127,119,221,0.1); }
+  @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .caption-card:nth-child(2) { animation-delay: 0.15s; }
+
+  .caption-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .caption-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-2); display: flex; align-items: center; gap: 6px; }
+  .badge { font-size: 10px; padding: 3px 9px; border-radius: 999px; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .badge-ai { background: var(--purple-light); color: var(--purple-dark); }
+  .badge-edited { background: var(--green-bg); color: var(--green-text); }
+  .caption-actions { display: flex; gap: 6px; }
+  .icon-btn { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer; color: var(--text-2); transition: all 0.15s; }
+  .icon-btn:hover { background: var(--purple-light); color: var(--purple); border-color: var(--purple-mid); }
+
+  .caption-text {
+    width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; font-size: 14px; line-height: 1.6;
+    color: var(--text); background: var(--bg);
+    font-family: inherit; resize: vertical; min-height: 80px;
+    transition: border-color 0.15s;
+  }
+  .caption-text:focus { outline: none; border-color: var(--purple); background: var(--surface); }
+
+  .caption-footer { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 10px; }
+  .hashtags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tag { font-size: 11px; background: var(--purple-light); color: var(--purple-dark); padding: 3px 9px; border-radius: 999px; cursor: pointer; transition: background 0.15s; }
+  .tag:hover { background: #dddcfc; }
+  .char-count { font-size: 11px; color: var(--text-3); white-space: nowrap; margin-left: 10px; flex-shrink: 0; margin-top: 2px; }
+  .char-count.warn { color: #ba7517; }
+
+  .select-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .select-radio { width: 16px; height: 16px; accent-color: var(--purple); cursor: pointer; }
+  .select-label { font-size: 13px; color: var(--text-2); }
+  .select-label strong { color: var(--text); }
+
+  /* ACTIONS */
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+  .actions-left { display: flex; gap: 8px; }
+  .actions-right { display: flex; gap: 10px; }
+  .btn-ghost { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; }
+  .btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-primary { background: var(--purple); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .btn-primary:hover { background: #6b63c8; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">⚡</div>
+    Caption<span>AI</span>
+  </a>
+  <div class="nav-links">
+    <div class="nav-link active">Create</div>
+    <div class="nav-link">History</div>
+    <div class="nav-link">Analytics</div>
+    <div class="nav-link">Settings</div>
+  </div>
+  <div class="avatar">JL</div>
+</nav>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Upload</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">2</div><div class="step-name">Generate</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">3</div><div class="step-name">Review</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">4</div><div class="step-name">Platform</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">5</div><div class="step-name">Schedule</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">6</div><div class="step-name">Done</div></div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="page-heading">Review your captions</div>
+    <div class="page-sub">AI has generated 2 caption variants. Edit, pick hashtags, then choose one to continue.</div>
+
+    <div class="source-row">
+      <div class="source-thumb">🖼️</div>
+      <div class="source-info">
+        <div class="source-name">café-morning.jpg</div>
+        <div class="source-meta">Topic: New café opening in KL · Tone: Casual & friendly · English</div>
+      </div>
+      <div class="source-change">← Change</div>
+    </div>
+
+    <div class="ai-loader" id="aiLoader">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      AI is crafting your captions…
+    </div>
+
+    <div id="captionsArea" style="display:none">
+
+      <div class="caption-card selected" id="cardA">
+        <div class="caption-top">
+          <div class="caption-label">Caption A <span class="badge badge-ai">AI generated</span></div>
+          <div class="caption-actions">
+            <div class="icon-btn" title="Copy">📋</div>
+            <div class="icon-btn" title="Regenerate this">🔄</div>
+          </div>
+        </div>
+        <textarea class="caption-text" id="textA" oninput="countChars('textA','countA')">☕ Good mornings start here. We're officially open — come find your corner, your cup, and your calm. Every detail designed for you. 🤍</textarea>
+        <div class="caption-footer">
+          <div class="hashtags">
+            <div class="tag">#NewCafe</div>
+            <div class="tag">#KLCafe</div>
+            <div class="tag">#CoffeeLover</div>
+            <div class="tag">#Minimalist</div>
+            <div class="tag">+ Add</div>
+          </div>
+          <div class="char-count" id="countA">136 / 2200</div>
+        </div>
+        <div class="select-row">
+          <input type="radio" class="select-radio" name="chosen" value="A" checked>
+          <div class="select-label"><strong>Use Caption A</strong> — proceed with this</div>
+        </div>
+      </div>
+
+      <div class="caption-card" id="cardB">
+        <div class="caption-top">
+          <div class="caption-label">Caption B <span class="badge badge-edited">Edited</span></div>
+          <div class="caption-actions">
+            <div class="icon-btn" title="Copy">📋</div>
+            <div class="icon-btn" title="Regenerate this">🔄</div>
+          </div>
+        </div>
+        <textarea class="caption-text" id="textB" oninput="countChars('textB','countB')">Something new is brewing in the city. Simple spaces, honest coffee, good people. Find us at [location] — we saved you a seat. Come say hello ☕</textarea>
+        <div class="caption-footer">
+          <div class="hashtags">
+            <div class="tag">#CafeVibes</div>
+            <div class="tag">#KLFoodie</div>
+            <div class="tag">#OpenNow</div>
+            <div class="tag">#CoffeeTime</div>
+            <div class="tag">+ Add</div>
+          </div>
+          <div class="char-count" id="countB">157 / 2200</div>
+        </div>
+        <div class="select-row">
+          <input type="radio" class="select-radio" name="chosen" value="B">
+          <div class="select-label"><strong>Use Caption B</strong> — proceed with this</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <div class="actions-left">
+        <button class="btn-ghost" onclick="window.location.href='screen1-upload.html'">← Back</button>
+        <button class="btn-ghost" id="regenBtn" style="display:none">🔄 Regenerate all</button>
+      </div>
+      <div class="actions-right">
+        <button class="btn-primary" id="nextBtn" style="display:none" onclick="window.location.href='screen3-review.html'">
+          Choose platform →
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  setTimeout(() => {
+    document.getElementById('aiLoader').style.display = 'none';
+    document.getElementById('captionsArea').style.display = 'block';
+    document.getElementById('regenBtn').style.display = 'flex';
+    document.getElementById('nextBtn').style.display = 'flex';
+  }, 2200);
+
+  function countChars(textId, countId) {
+    const len = document.getElementById(textId).value.length;
+    const el = document.getElementById(countId);
+    el.textContent = len + ' / 2200';
+    el.classList.toggle('warn', len > 1800);
+  }
+
+  document.querySelectorAll('input[name="chosen"]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('.caption-card').forEach(c => c.classList.remove('selected'));
+      r.closest('.caption-card').classList.add('selected');
+    });
+  });
+</script>
+</body>
+</html>

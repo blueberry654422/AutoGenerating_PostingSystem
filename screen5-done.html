@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaptionAI — Done</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7f77dd; --purple-light: #eeedfe; --purple-mid: #afa9ec; --purple-dark: #3c3489;
+    --bg: #f8f7fc; --surface: #ffffff; --border: #e4e2f0;
+    --text: #1a1828; --text-2: #6b6880; --text-3: #a09db8;
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --amber-bg: #faeeda; --amber-text: #854f0b;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav { background: #0e0c1a; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #fff; text-decoration: none; }
+  .logo-icon { width: 28px; height: 28px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo span { color: var(--purple-mid); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #888; }
+  .nav-link.active { color: #fff; background: rgba(127,119,221,0.2); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2f2d70; color: var(--purple-mid); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+
+  .stepper-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .stepper { display: flex; align-items: center; max-width: 780px; margin: 0 auto; padding: 14px 0; gap: 0; overflow-x: auto; }
+  .step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); color: var(--text-3); background: var(--bg); }
+  .step-name { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .step.active .step-num { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .step.active .step-name { color: var(--text); font-weight: 500; }
+  .step.done .step-num { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); font-size: 13px; }
+  .step.done .step-name { color: var(--text-2); }
+  .step-line { flex: 1; min-width: 20px; height: 1px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--green-border); }
+
+  main { flex: 1; padding: 40px 32px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 580px; }
+
+  /* SUCCESS HERO */
+  .success-hero {
+    text-align: center; padding: 32px 20px 28px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 24px;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+  @keyframes popIn { from { opacity:0; transform: scale(0.92); } to { opacity:1; transform: scale(1); } }
+  .success-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--green-bg); border: 2px solid var(--green-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin: 0 auto 14px;
+  }
+  .success-title { font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+  .success-sub { font-size: 14px; color: var(--text-2); }
+
+  /* STAT GRID */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 12px; text-align: center; }
+  .stat-val { font-size: 22px; font-weight: 500; color: var(--text); }
+  .stat-label { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+
+  /* RESULT CARDS */
+  .section-label { font-size: 12px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; animation: slideUp 0.3s ease both; }
+  .result-card:nth-child(2) { animation-delay: 0.1s; }
+  .result-card:nth-child(3) { animation-delay: 0.2s; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .result-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); }
+  .result-platform { font-size: 14px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .status-pill { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; }
+  .pill-posted { background: var(--green-bg); color: var(--green-text); }
+  .pill-pending { background: var(--amber-bg); color: var(--amber-text); }
+  .pill-failed { background: #fcebeb; color: #a32d2d; }
+
+  .result-body { padding: 14px 16px; }
+  .result-caption { font-size: 13px; line-height: 1.7; color: var(--text-2); margin-bottom: 10px; }
+  .result-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+  .rtag { font-size: 11px; background: var(--purple-light); color: var(--purple-dark); padding: 2px 8px; border-radius: 999px; }
+
+  .result-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-3); padding-top: 10px; border-top: 1px solid var(--border); }
+  .meta-item { display: flex; align-items: center; gap: 4px; }
+  .view-link { color: var(--purple); text-decoration: none; cursor: pointer; font-size: 12px; margin-left: auto; }
+  .view-link:hover { text-decoration: underline; }
+
+  /* PENDING ACTION */
+  .pending-action { background: var(--amber-bg); border: 1px solid #fac775; border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .pending-text { font-size: 13px; color: var(--amber-text); }
+  .btn-small { background: var(--purple); color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; font-weight: 500; }
+
+  /* CTA ROW */
+  .cta-row { display: flex; gap: 10px; margin-top: 28px; }
+  .btn-ghost { flex: 1; background: var(--surface); color: var(--text-2); border: 1px solid var(--border); padding: 12px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; text-align: center; transition: all 0.15s; }
+  .btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-primary { flex: 1; background: var(--purple); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; text-align: center; transition: background 0.15s; }
+  .btn-primary:hover { background: #6b63c8; }
+
+  /* HISTORY PREVIEW */
+  .history-section { margin-top: 28px; }
+  .history-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s; }
+  .history-row:hover { border-color: var(--purple-mid); }
+  .history-thumb { width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, var(--purple-mid), var(--purple)); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .history-info { flex: 1; }
+  .history-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .history-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .history-status { font-size: 11px; padding: 3px 8px; border-radius: 999px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#"><div class="logo-icon">⚡</div>Caption<span>AI</span></a>
+  <div class="nav-links">
+    <div class="nav-link active">Create</div>
+    <div class="nav-link">History</div>
+    <div class="nav-link">Analytics</div>
+    <div class="nav-link">Settings</div>
+  </div>
+  <div class="avatar">JL</div>
+</nav>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Upload</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Generate</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Review</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Platform</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Schedule</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">✓</div><div class="step-name">Done</div></div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+
+    <div class="success-hero">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Posted successfully</div>
+      <div class="success-sub">2 of 2 platforms submitted · Saved to history automatically</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-val">2</div>
+        <div class="stat-label">Platforms</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">8:42</div>
+        <div class="stat-label">Time posted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">136</div>
+        <div class="stat-label">Chars used</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">5</div>
+        <div class="stat-label">Hashtags</div>
+      </div>
+    </div>
+
+    <div class="section-label">Post results</div>
+
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-platform">📕 Xiaohongshu</div>
+        <div class="status-pill pill-pending">Awaiting confirm</div>
+      </div>
+      <div class="result-body">
+        <div class="result-caption">☕ 早安，从一杯好咖啡开始。我们正式开业啦！每一个细节都为你精心打造，来找到属于你的角落、你的那杯咖啡和你的宁静时光 🤍</div>
+        <div class="result-tags">
+          <div class="rtag">#新开咖啡馆</div>
+          <div class="rtag">#KL咖啡</div>
+          <div class="rtag">#咖啡生活</div>
+          <div class="rtag">#生活方式</div>
+          <div class="rtag">#极简美学</div>
+        </div>
+        <div class="result-meta">
+          <div class="meta-item">📅 13 May 2026</div>
+          <div class="meta-item">🕐 8:42 AM</div>
+        </div>
+        <div class="pending-action">
+          <div class="pending-text">Open XHS app and tap Confirm to publish</div>
+          <button class="btn-small">Remind me</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-card">
+      <div class="result-header">
+        <div class="result-platform">📸 Instagram</div>
+        <div class="status-pill pill-posted">Posted</div>
+      </div>
+      <div class="result-body">
+        <div class="result-caption">☕ Good mornings start here. We're officially open — come find your corner, your cup, and your calm. Every detail designed for you. 🤍</div>
+        <div class="result-tags">
+          <div class="rtag">#NewCafe</div>
+          <div class="rtag">#KLCafe</div>
+          <div class="rtag">#CoffeeLover</div>
+          <div class="rtag">#Minimalist</div>
+          <div class="rtag">#CafeVibes</div>
+        </div>
+        <div class="result-meta">
+          <div class="meta-item">📅 13 May 2026</div>
+          <div class="meta-item">🕐 8:42 AM</div>
+          <a class="view-link">View on Instagram ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn-ghost" onclick="window.location.href='screen1-upload.html'">+ New post</button>
+      <button class="btn-primary">📊 View analytics</button>
+    </div>
+
+    <div class="history-section">
+      <div class="section-label" style="margin-top:0">Recent posts</div>
+      <div class="history-row">
+        <div class="history-thumb">🖼️</div>
+        <div class="history-info">
+          <div class="history-title">Café morning opening</div>
+          <div class="history-meta">Today · XHS, Instagram</div>
+        </div>
+        <div class="history-status pill-posted" style="background:var(--green-bg);color:var(--green-text);padding:3px 10px;border-radius:999px;font-size:11px">Posted</div>
+      </div>
+      <div class="history-row">
+        <div class="history-thumb" style="background:linear-gradient(135deg,#9fe1cb,#1d9e75)">🛍️</div>
+        <div class="history-info">
+          <div class="history-title">Weekend sale announcement</div>
+          <div class="history-meta">Yesterday · Instagram, Facebook</div>
+        </div>
+        <div class="history-status" style="background:var(--green-bg);color:var(--green-text);padding:3px 10px;border-radius:999px;font-size:11px">Posted</div>
+      </div>
+      <div class="history-row">
+        <div class="history-thumb" style="background:linear-gradient(135deg,#fac775,#ba7517)">☕</div>
+        <div class="history-info">
+          <div class="history-title">New menu drop — autumn drinks</div>
+          <div class="history-meta">2 days ago · XHS</div>
+        </div>
+        <div class="history-status" style="background:var(--amber-bg);color:var(--amber-text);padding:3px 10px;border-radius:999px;font-size:11px">Awaiting confirm</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

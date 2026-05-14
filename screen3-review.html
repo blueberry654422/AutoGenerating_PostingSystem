@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaptionAI — Choose Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #7f77dd; --purple-light: #eeedfe; --purple-mid: #afa9ec; --purple-dark: #3c3489;
+    --bg: #f8f7fc; --surface: #ffffff; --border: #e4e2f0;
+    --text: #1a1828; --text-2: #6b6880; --text-3: #a09db8;
+    --green-bg: #eaf3de; --green-text: #3b6d11; --green-border: #97c459;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+
+  nav { background: #0e0c1a; padding: 0 32px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 500; color: #fff; text-decoration: none; }
+  .logo-icon { width: 28px; height: 28px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .logo span { color: var(--purple-mid); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link { padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #888; }
+  .nav-link.active { color: #fff; background: rgba(127,119,221,0.2); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2f2d70; color: var(--purple-mid); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; }
+
+  .stepper-wrap { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; }
+  .stepper { display: flex; align-items: center; max-width: 780px; margin: 0 auto; padding: 14px 0; gap: 0; overflow-x: auto; }
+  .step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--border); color: var(--text-3); background: var(--bg); }
+  .step-name { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .step.active .step-num { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .step.active .step-name { color: var(--text); font-weight: 500; }
+  .step.done .step-num { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); font-size: 13px; }
+  .step.done .step-name { color: var(--text-2); }
+  .step-line { flex: 1; min-width: 20px; height: 1px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--green-border); }
+
+  main { flex: 1; padding: 40px 32px; display: flex; justify-content: center; }
+  .container { width: 100%; max-width: 680px; }
+  .page-heading { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text-2); margin-bottom: 28px; }
+
+  /* LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .col-label { font-size: 12px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; }
+
+  /* PLATFORM CARDS */
+  .platform-card {
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 16px 16px 14px; cursor: pointer; background: var(--surface);
+    transition: all 0.2s; margin-bottom: 10px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .platform-card:hover { border-color: var(--purple-mid); background: var(--purple-light); }
+  .platform-card.selected { border-color: var(--purple); background: var(--purple-light); }
+  .platform-icon { font-size: 26px; flex-shrink: 0; line-height: 1; }
+  .platform-info { flex: 1; }
+  .platform-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .platform-desc { font-size: 12px; color: var(--text-2); margin-top: 2px; line-height: 1.4; }
+  .platform-limits { font-size: 11px; color: var(--text-3); margin-top: 5px; font-family: 'DM Mono', monospace; }
+  .platform-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; transition: all 0.15s;
+  }
+  .platform-card.selected .platform-check { background: var(--purple); border-color: var(--purple); color: #fff; }
+
+  /* PREVIEW PANEL */
+  .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .preview-tabs { display: flex; border-bottom: 1px solid var(--border); }
+  .preview-tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; color: var(--text-2); cursor: pointer; transition: all 0.15s; border-bottom: 2px solid transparent; }
+  .preview-tab.active { color: var(--purple); border-bottom-color: var(--purple); font-weight: 500; }
+  .preview-content { padding: 16px; }
+  .preview-platform-label { font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .preview-caption { font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 10px; }
+  .preview-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ptag { font-size: 11px; background: var(--purple-light); color: var(--purple-dark); padding: 2px 8px; border-radius: 999px; }
+  .preview-note { font-size: 11px; color: var(--text-3); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); line-height: 1.5; }
+  .note-warn { color: #854f0b; background: #faeeda; border-color: #fac775; padding: 8px 10px; border-radius: 6px; border: 1px solid; }
+
+  /* SUMMARY BAR */
+  .summary-bar { background: var(--purple-light); border: 1px solid var(--purple-mid); border-radius: var(--radius-sm); padding: 12px 16px; margin-top: 20px; display: flex; align-items: center; justify-content: space-between; }
+  .summary-text { font-size: 13px; color: var(--purple-dark); }
+  .summary-count { font-size: 13px; font-weight: 500; color: var(--purple); }
+
+  .actions { display: flex; justify-content: space-between; margin-top: 24px; }
+  .btn-ghost { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--purple); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px; transition: background 0.15s; }
+  .btn-primary:hover { background: #6b63c8; }
+  .btn-primary:disabled { background: var(--border); color: var(--text-3); cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#"><div class="logo-icon">⚡</div>Caption<span>AI</span></a>
+  <div class="nav-links">
+    <div class="nav-link active">Create</div>
+    <div class="nav-link">History</div>
+    <div class="nav-link">Analytics</div>
+    <div class="nav-link">Settings</div>
+  </div>
+  <div class="avatar">JL</div>
+</nav>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Upload</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Generate</div></div>
+    <div class="step-line done"></div>
+    <div class="step done"><div class="step-num">✓</div><div class="step-name">Review</div></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">4</div><div class="step-name">Platform</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">5</div><div class="step-name">Schedule</div></div>
+    <div class="step-line"></div>
+    <div class="step"><div class="step-num">6</div><div class="step-name">Done</div></div>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="page-heading">Choose platforms</div>
+    <div class="page-sub">Select where to post. Captions will be automatically optimised per platform.</div>
+
+    <div class="two-col">
+      <div>
+        <div class="col-label">Platforms</div>
+
+        <div class="platform-card selected" data-platform="xhs" onclick="togglePlatform(this, 'xhs')">
+          <div class="platform-icon">📕</div>
+          <div class="platform-info">
+            <div class="platform-name">Xiaohongshu (XHS)</div>
+            <div class="platform-desc">小红书 · Lifestyle & discovery</div>
+            <div class="platform-limits">Max 1000 chars · 30 hashtags</div>
+          </div>
+          <div class="platform-check">✓</div>
+        </div>
+
+        <div class="platform-card selected" data-platform="ig" onclick="togglePlatform(this, 'ig')">
+          <div class="platform-icon">📸</div>
+          <div class="platform-info">
+            <div class="platform-name">Instagram</div>
+            <div class="platform-desc">Feed post + optional Stories</div>
+            <div class="platform-limits">Max 2200 chars · 30 hashtags</div>
+          </div>
+          <div class="platform-check">✓</div>
+        </div>
+
+        <div class="platform-card" data-platform="fb" onclick="togglePlatform(this, 'fb')">
+          <div class="platform-icon">🔵</div>
+          <div class="platform-info">
+            <div class="platform-name">Facebook</div>
+            <div class="platform-desc">Page post · Organic reach</div>
+            <div class="platform-limits">Max 63,206 chars</div>
+          </div>
+          <div class="platform-check"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="col-label">Caption preview</div>
+        <div class="preview-panel">
+          <div class="preview-tabs">
+            <div class="preview-tab active" onclick="switchTab(this,'xhs')">📕 XHS</div>
+            <div class="preview-tab" onclick="switchTab(this,'ig')">📸 IG</div>
+            <div class="preview-tab" onclick="switchTab(this,'fb')">🔵 FB</div>
+          </div>
+
+          <div class="preview-content" id="prev-xhs">
+            <div class="preview-platform-label">📕 Xiaohongshu version</div>
+            <div class="preview-caption">☕ 早安，从一杯好咖啡开始。<br><br>我们正式开业啦！每一个细节都为你精心打造，来找到属于你的角落、你的那杯咖啡和你的宁静时光 🤍</div>
+            <div class="preview-tags">
+              <div class="ptag">#新开咖啡馆</div>
+              <div class="ptag">#KL咖啡</div>
+              <div class="ptag">#咖啡生活</div>
+              <div class="ptag">#生活方式</div>
+              <div class="ptag">#极简美学</div>
+            </div>
+            <div class="preview-note note-warn">⚠ XHS requires manual in-app confirmation after API submission. You'll get a notification when ready.</div>
+          </div>
+
+          <div class="preview-content" id="prev-ig" style="display:none">
+            <div class="preview-platform-label">📸 Instagram version</div>
+            <div class="preview-caption">☕ Good mornings start here. We're officially open — come find your corner, your cup, and your calm. Every detail designed for you. 🤍</div>
+            <div class="preview-tags">
+              <div class="ptag">#NewCafe</div>
+              <div class="ptag">#KLCafe</div>
+              <div class="ptag">#CoffeeLover</div>
+              <div class="ptag">#Minimalist</div>
+              <div class="ptag">#CafeVibes</div>
+            </div>
+            <div class="preview-note">Instagram auto-posts via API. First comment option available for hashtags.</div>
+          </div>
+
+          <div class="preview-content" id="prev-fb" style="display:none">
+            <div class="preview-platform-label">🔵 Facebook version</div>
+            <div class="preview-caption">Good mornings start here ☕<br><br>We're officially open — come find your corner, your cup, and your calm. Every detail has been thoughtfully designed to give you a space that feels like yours.<br><br>Visit us at [address] · Open daily 8am–8pm</div>
+            <div class="preview-tags">
+              <div class="ptag">#NewCafe</div>
+              <div class="ptag">#KL</div>
+              <div class="ptag">#CoffeeLover</div>
+            </div>
+            <div class="preview-note">Facebook posts are published automatically via Graph API.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="summary-text">Posting to: <strong id="platformList">Xiaohongshu, Instagram</strong></div>
+      <div class="summary-count" id="platformCount">2 platforms selected</div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost" onclick="window.location.href='screen2-generate.html'">← Back</button>
+      <button class="btn-primary" id="nextBtn" onclick="window.location.href='screen4-schedule.html'">
+        Next: Schedule →
+      </button>
+    </div>
+  </div>
+</main>
+
+<script>
+  const selected = new Set(['xhs', 'ig']);
+  const names = { xhs: 'Xiaohongshu', ig: 'Instagram', fb: 'Facebook' };
+
+  function togglePlatform(card, id) {
+    if (selected.has(id)) {
+      if (selected.size === 1) return;
+      selected.delete(id);
+      card.classList.remove('selected');
+      card.querySelector('.platform-check').textContent = '';
+    } else {
+      selected.add(id);
+      card.classList.add('selected');
+      card.querySelector('.platform-check').textContent = '✓';
+    }
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const list = [...selected].map(k => names[k]).join(', ');
+    document.getElementById('platformList').textContent = list;
+    document.getElementById('platformCount').textContent = selected.size + ' platform' + (selected.size > 1 ? 's' : '') + ' selected';
+  }
+
+  function switchTab(tab, id) {
+    document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['xhs','ig','fb'].forEach(p => {
+      const el = document.getElementById('prev-' + p);
+      if (el) el.style.display = p === id ? 'block' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
