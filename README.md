@@ -64,18 +64,18 @@ The root `package.json` provides the `concurrently` script that runs both server
 npm install
 ```
 
-### 3. Install client dependencies
+### 3. Install frontend dependencies
 
 ```bash
-cd client
+cd frontend
 npm install
 cd ..
 ```
 
-### 4. Install server dependencies
+### 4. Install backend dependencies
 
 ```bash
-cd server
+cd backend
 npm install
 cd ..
 ```
@@ -116,13 +116,13 @@ If you prefer to run them separately (e.g. for debugging):
 
 **Terminal 1 — Backend:**
 ```bash
-cd server
+cd backend
 npm run dev
 ```
 
 **Terminal 2 — Frontend:**
 ```bash
-cd client
+cd frontend
 npm run dev
 ```
 
@@ -133,7 +133,7 @@ npm run dev
 ```
 AutoGenerating_PostingSystem/
 ├── package.json                  # Root: dev script (concurrently)
-├── client/                       # React + Vite frontend
+├── frontend/                     # React + Vite frontend
 │   ├── index.html
 │   ├── vite.config.js            # Proxies /api → localhost:3001
 │   └── src/
@@ -149,7 +149,7 @@ AutoGenerating_PostingSystem/
 │       │   ├── SchedulePage.jsx
 │       │   └── DonePage.jsx
 │       └── styles/global.css     # Shared CSS variables and utilities
-└── server/                       # Express backend
+└── backend/                      # Express backend
     ├── index.js                  # Entry point (port 3001)
     ├── middleware/multer.js      # File upload config
     ├── mock/
@@ -195,9 +195,9 @@ AutoGenerating_PostingSystem/
 
 ## Notes for Developers
 
-- **Storage is in-memory.** All sessions and posts are lost when the server restarts. To add persistence, replace `server/store/inMemoryStore.js` with a database (e.g. SQLite, PostgreSQL, MongoDB).
-- **AI is mocked.** Caption generation uses hardcoded templates in `server/mock/captionGenerator.js`. To use a real LLM, replace the `generateCaptions` and `regenerateCaption` functions with API calls to Claude, OpenAI, etc.
-- **Social posting is mocked.** `server/mock/socialPoster.js` simulates posting. XHS always returns `pending` (requires in-app confirmation), IG and FB return `posted`. Replace with real Meta Graph API and XHS API calls when ready.
+- **Storage is in-memory.** All sessions and posts are lost when the server restarts. To add persistence, replace `backend/store/inMemoryStore.js` with a database (e.g. SQLite, PostgreSQL, MongoDB).
+- **AI is mocked.** Caption generation uses hardcoded templates in `backend/mock/captionGenerator.js`. To use a real LLM, replace the `generateCaptions` and `regenerateCaption` functions with API calls to Claude, OpenAI, etc.
+- **Social posting is mocked.** `backend/mock/socialPoster.js` simulates posting. XHS always returns `pending` (requires in-app confirmation), IG and FB return `posted`. Replace with real Meta Graph API and XHS API calls when ready.
 - **Image uploads** are held in memory (max 10 MB). Sessions older than 2 hours are automatically purged.
 
 ---
