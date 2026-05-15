@@ -1,0 +1,60 @@
+.platform-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-bottom: 24px;
+}
+.platform-card {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: 16px; cursor: pointer; position: relative;
+  transition: all 0.15s; background: var(--surface);
+  text-align: center;
+}
+.platform-card:hover { border-color: var(--purple); }
+.platform-card.selected { border-color: var(--purple); background: var(--purple-light); }
+.platform-check {
+  position: absolute; top: 10px; right: 10px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--purple); color: #fff;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+}
+.platform-icon { font-size: 24px; margin-bottom: 8px; }
+.platform-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.platform-limit { font-size: 11px; color: var(--text-3); }
+
+.preview-panel {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 24px;
+}
+.preview-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+}
+.preview-tab {
+  padding: 12px 18px; font-size: 13px; color: var(--text-2);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.preview-tab.active { color: var(--purple); border-bottom-color: var(--purple); font-weight: 500; }
+.preview-content { padding: 18px; }
+.preview-caption-text {
+  font-size: 14px; color: var(--text); line-height: 1.6;
+  white-space: pre-wrap; margin-bottom: 12px;
+}
+.preview-hashtags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.preview-hashtag {
+  font-size: 12px; color: var(--purple);
+  background: var(--purple-light); border-radius: 20px;
+  padding: 3px 10px;
+}
+.preview-note {
+  font-size: 12px; color: #a36c00;
+  background: #fff8ec; border: 1px solid #f5dba0;
+  border-radius: var(--radius-sm); padding: 10px 12px;
+}
+.preview-meta { font-size: 12px; color: var(--text-3); margin-top: 8px; }
+.preview-empty { padding: 32px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+.summary-bar {
+  font-size: 13px; color: var(--text-2);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  margin-bottom: 8px;
+}
