@@ -1,5 +1,5 @@
 .success-hero {
-  text-align: center; padding: 32px 0 24px;
+  text-align: center; padding: clamp(20px, 5vw, 32px) 0 24px;
 }
 .success-icon {
   width: 64px; height: 64px; border-radius: 50%;
@@ -11,7 +11,7 @@
 .success-sub { font-size: 14px; color: var(--text-2); }
 
 .stat-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
   margin-bottom: 24px;
 }
 .stat-card {
@@ -28,6 +28,7 @@
 }
 .result-header {
   display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
 }
 .result-platform { font-size: 14px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
@@ -47,7 +48,58 @@
   font-size: 12px; color: var(--purple);
   background: var(--purple-light); border-radius: 20px; padding: 2px 9px;
 }
-.result-meta { font-size: 12px; color: var(--text-3); display: flex; gap: 16px; }
+.posting-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.post-action {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-2);
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.post-action:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+.post-action.primary {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+  font-weight: 500;
+}
+.post-action.primary:hover {
+  background: #6b63c8;
+  color: #fff;
+}
+.copy-status {
+  font-size: 12px;
+  color: #3b6d11;
+  background: #eaf3de;
+  border: 1px solid #cfe4b8;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.copy-status.error {
+  color: #b83232;
+  background: #fde9e9;
+  border-color: #f4b9b9;
+}
+.result-meta { font-size: 12px; color: var(--text-3); display: flex; gap: 16px; flex-wrap: wrap; }
 .result-link { font-size: 12px; color: var(--purple); text-decoration: none; }
 .result-link:hover { text-decoration: underline; }
 .result-confirm-note {
@@ -55,6 +107,7 @@
   border-radius: var(--radius-sm); padding: 10px 12px;
   font-size: 12px; color: #7a4d00;
   display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
   margin-top: 10px;
 }
 .remind-btn {
@@ -66,12 +119,14 @@
 .cta-row {
   display: flex; gap: 10px; justify-content: center;
   margin: 24px 0;
+  flex-wrap: wrap;
 }
 
 .history-section { margin-top: 32px; }
 .history-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
 .history-row {
   display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
   padding: 12px 0; border-bottom: 1px solid var(--border);
   font-size: 13px;
 }
@@ -84,3 +139,59 @@
 .history-status.posted { background: #eaf3de; color: #3b6d11; }
 .history-status.partial { background: #fff3dc; color: #a36c00; }
 .history-status.pending { background: #f0f0f0; color: #666; }
+
+@media (max-width: 680px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  .success-title { font-size: 20px; }
+
+  .stat-grid {
+    gap: 8px;
+  }
+  .stat-card {
+    padding: 12px 8px;
+  }
+  .stat-value {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+
+  .result-card { padding: 14px; }
+  .result-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .result-confirm-note {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .posting-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .post-action {
+    width: 100%;
+    min-height: 42px;
+  }
+  .remind-btn {
+    width: 100%;
+    min-height: 36px;
+  }
+  .cta-row > button {
+    width: 100%;
+  }
+
+  .history-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

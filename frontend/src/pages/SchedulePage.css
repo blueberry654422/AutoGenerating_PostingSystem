@@ -8,6 +8,7 @@
   flex: 1; padding: 12px; text-align: center;
   font-size: 13px; color: var(--text-2); cursor: pointer;
   border-right: 1px solid var(--border); transition: all 0.15s;
+  min-width: 0;
 }
 .mode-tab:last-child { border-right: none; }
 .mode-tab.active { background: var(--purple-light); color: var(--purple); font-weight: 500; }
@@ -19,6 +20,7 @@
 
 .platform-status-row {
   display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
   padding: 10px 0; border-bottom: 1px solid var(--border);
 }
 .platform-status-row:last-child { border-bottom: none; }
@@ -48,7 +50,7 @@
 .best-time-platform { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
 .best-time-options { display: flex; gap: 8px; flex-wrap: wrap; }
 .best-time-option {
-  flex: 1; min-width: 80px;
+  flex: 1 1 120px; min-width: 100px;
   border: 1.5px solid var(--border); border-radius: var(--radius-sm);
   padding: 10px; text-align: center; cursor: pointer;
   transition: all 0.15s; background: var(--surface);
@@ -65,3 +67,36 @@
 .post-summary-row { font-size: 13px; color: var(--text-2); margin-bottom: 6px; }
 .post-summary-row:last-child { margin-bottom: 0; }
 .post-summary-row strong { color: var(--text); }
+
+@media (min-width: 760px) {
+  .schedule-fields {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .mode-tabs {
+    flex-direction: column;
+  }
+  .mode-tab {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .mode-tab:last-child { border-bottom: none; }
+  .mode-panel { padding: 16px; }
+
+  .platform-status-row {
+    align-items: flex-start;
+  }
+  .status-pill {
+    flex: 0 0 auto;
+  }
+  .best-time-options {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .best-time-option {
+    min-width: 0;
+  }
+}

@@ -11,7 +11,7 @@
   font-size: 18px; flex-shrink: 0;
 }
 .source-thumb img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
-.source-info { flex: 1; }
+.source-info { flex: 1; min-width: 0; }
 .source-name { font-size: 13px; font-weight: 500; color: var(--text); }
 .source-meta { font-size: 12px; color: var(--text-2); margin-top: 2px; }
 .source-change { font-size: 12px; color: var(--purple); cursor: pointer; }
@@ -45,19 +45,22 @@
 .caption-header {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .caption-label {
-  width: 28px; height: 28px; border-radius: 8px;
+  width: auto; min-width: 52px; height: 28px; border-radius: 8px;
+  padding: 0 10px;
   background: var(--purple-light); color: var(--purple);
   font-size: 12px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
+  white-space: nowrap;
 }
 .caption-badge {
   font-size: 11px; padding: 3px 8px; border-radius: 20px;
   background: var(--purple-light); color: var(--purple);
 }
 .caption-badge.edited { background: #fff3dc; color: #a36c00; }
-.caption-actions { display: flex; gap: 6px; margin-left: auto; }
+.caption-actions { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; justify-content: flex-end; }
 .caption-action-btn {
   font-size: 12px; color: var(--text-2); background: var(--bg);
   border: 1px solid var(--border); border-radius: 6px;
@@ -67,7 +70,7 @@
 .caption-action-btn:hover { border-color: var(--purple); color: var(--purple); }
 
 .caption-textarea {
-  width: 100%; min-height: 100px;
+  width: 100%; min-height: clamp(112px, 20vw, 160px);
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   padding: 10px 12px; font-size: 14px; color: var(--text);
   font-family: inherit; resize: vertical; outline: none;
@@ -103,4 +106,34 @@
 .section-label {
   font-size: 12px; font-weight: 500; color: var(--text-2);
   margin-bottom: 14px;
+}
+
+@media (min-width: 1100px) {
+  .caption-card { padding: 22px; }
+}
+
+@media (max-width: 560px) {
+  .source-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .source-change {
+    width: 100%;
+    padding-top: 4px;
+  }
+  .source-name {
+    overflow-wrap: anywhere;
+  }
+
+  .caption-card { padding: 14px; }
+  .caption-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+  .caption-action-btn {
+    flex: 1 1 130px;
+    min-height: 36px;
+  }
+  .hashtag-row { gap: 7px; }
 }

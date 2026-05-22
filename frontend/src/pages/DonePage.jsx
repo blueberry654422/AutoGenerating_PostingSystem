@@ -6,15 +6,49 @@ import { getHistory } from '../api/client';
 import './DonePage.css';
 
 const PLATFORM_META = {
-  xhs: { name: 'Xiaohongshu', icon: '📕' },
-  ig:  { name: 'Instagram',   icon: '📸' },
-  fb:  { name: 'Facebook',    icon: '📘' },
+  xhs: {
+    name: 'Xiaohongshu',
+    icon: '📕',
+    appUrl: 'xhsdiscover://',
+    webUrl: 'https://www.xiaohongshu.com/',
+  },
+  ig:  {
+    name: 'Instagram',
+    icon: '📸',
+    appUrl: 'instagram://camera',
+    webUrl: 'https://www.instagram.com/',
+  },
+  fb:  {
+    name: 'Facebook',
+    icon: '📘',
+    appUrl: 'fb://facewebmodal/f?href=https://www.facebook.com/',
+    webUrl: 'https://www.facebook.com/',
+  },
 };
+
+const isMobileDevice = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+function buildPostText(platformCaption) {
+  if (!platformCaption) return '';
+  const tags = platformCaption.hashtags?.length ? `\n\n${platformCaption.hashtags.join(' ')}` : '';
+  return `${platformCaption.body}${tags}`;
+}
+
+async function copyText(text) {
+  if (!text) return false;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
 
 export default function DonePage() {
   const navigate = useNavigate();
   const { state, dispatch } = usePost();
   const [history, setHistory] = useState([]);
+  const [actionStatus, setActionStatus] = useState({});
   const { postResult } = state;
 
   useEffect(() => {
@@ -27,6 +61,42 @@ export default function DonePage() {
     navigate('/');
   }
 
+  async function handleCopy(platform) {
+    const copied = await copyText(buildPostText(state.platformCaptions[platform]));
+    setActionStatus((prev) => ({
+      ...prev,
+      [platform]: copied ? 'Caption copied' : 'Copy failed',
+    }));
+  }
+
+  async function handleCopyAndOpen(platform) {
+    const meta = PLATFORM_META[platform] || { name: platform, webUrl: 'https://www.google.com/' };
+    const mobile = isMobileDevice();
+    const copyPromise = copyText(buildPostText(state.platformCaptions[platform]));
+
+    setActionStatus((prev) => ({
+      ...prev,
+      [platform]: 'Copying and opening...',
+    }));
+
+    if (mobile && meta.appUrl) {
+      window.location.href = meta.appUrl;
+      window.setTimeout(() => {
+        window.open(meta.webUrl, '_blank', 'noopener,noreferrer');
+      }, 900);
+    } else {
+      window.open(meta.webUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    const copied = await copyPromise;
+    window.setTimeout(() => {
+      setActionStatus((prev) => ({
+        ...prev,
+        [platform]: copied ? 'Copied and opened' : 'Opened. Copy manually',
+      }));
+    }, 1100);
+  }
+
   if (!postResult) return null;
 
   const { results, stats } = postResult;
@@ -35,8 +105,8 @@ export default function DonePage() {
     <PageShell>
       <div className="success-hero">
         <div className="success-icon">✅</div>
-        <div className="success-title">Post submitted!</div>
-        <div className="success-sub">Your content is on its way. Check the results below.</div>
+        <div className="success-title">Ready to post</div>
+        <div className="success-sub">Copy your caption, open each platform, paste, edit if needed, and publish.</div>
       </div>
 
       <div className="stat-grid">
@@ -65,8 +135,8 @@ export default function DonePage() {
           <div key={r.platform} className="result-card">
             <div className="result-header">
               <div className="result-platform">{meta.icon} {meta.name}</div>
-              <div className={`result-status ${r.status}`}>
-                {r.status === 'posted' ? '✓ Posted' : r.status === 'pending' ? 'Awaiting confirm' : 'Failed'}
+              <div className="result-status pending">
+                Ready to post
               </div>
             </div>
             {pc && (
@@ -77,15 +147,32 @@ export default function DonePage() {
                 </div>
               </>
             )}
+            <div className="posting-actions">
+              <button className="post-action primary" onClick={() => handleCopyAndOpen(r.platform)}>
+                Copy caption & open
+              </button>
+              <button className="post-action" onClick={() => handleCopy(r.platform)}>
+                Copy only
+              </button>
+              {state.image?.previewUrl && (
+                <a className="post-action" href={state.image.previewUrl} target="_blank" rel="noreferrer">
+                  Open image
+                </a>
+              )}
+            </div>
+            {actionStatus[r.platform] && (
+              <div className={`copy-status${actionStatus[r.platform].includes('failed') ? ' error' : ''}`}>
+                {actionStatus[r.platform]}
+              </div>
+            )}
             <div className="result-meta">
               <span>{new Date().toLocaleDateString()}</span>
               <span>{stats.timePosted}</span>
-              {r.postUrl && <a href={r.postUrl} target="_blank" rel="noreferrer" className="result-link">View post ↗</a>}
+              <a href={meta.webUrl} target="_blank" rel="noreferrer" className="result-link">Open website ↗</a>
             </div>
-            {r.requiresConfirm && (
+            {r.platform === 'xhs' && (
               <div className="result-confirm-note">
-                ⚠️ Open Xiaohongshu app to confirm and publish this post.
-                <button className="remind-btn">🔔 Remind me</button>
+                ⚠️ Xiaohongshu usually needs manual upload and final confirmation in the app.
               </div>
             )}
           </div>
