@@ -8,11 +8,23 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/upload', require('./routes/upload'));
-app.use('/api/captions', require('./routes/captions'));
-app.use('/api/platforms', require('./routes/platforms'));
-app.use('/api/schedule', require('./routes/schedule'));
-app.use('/api/posts', require('./routes/posts'));
+const uploadRoutes = require('./routes/upload');
+const captionRoutes = require('./routes/captions');
+const platformRoutes = require('./routes/platforms');
+const scheduleRoutes = require('./routes/schedule');
+const postRoutes = require('./routes/posts');
+
+app.use('/api/upload', uploadRoutes);
+app.use('/api/captions', captionRoutes);
+app.use('/api/platforms', platformRoutes);
+app.use('/api/schedule', scheduleRoutes);
+app.use('/api/posts', postRoutes);
+
+app.use('/upload', uploadRoutes);
+app.use('/captions', captionRoutes);
+app.use('/platforms', platformRoutes);
+app.use('/schedule', scheduleRoutes);
+app.use('/posts', postRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
